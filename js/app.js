@@ -471,6 +471,7 @@
      --------------------------------------------------------------------- */
   let queue = [];
   let queueIndex = 0;
+  let phase = 'active'; // 'prepare' | 'active' — prepare is the get-ready countdown before each step
   let secondsLeft = 0;
   let totalSeconds = 0;
   let timerHandle = null;
@@ -481,6 +482,7 @@
   let sessionLabel = '';
 
   const RING_CIRCUMFERENCE = 2 * Math.PI * 90;
+  const PREPARE_SECONDS = 3;
 
   function buildQueue(stretchIds) {
     const q = [];
@@ -508,28 +510,50 @@
     paused = false;
     $('#player').classList.remove('hidden');
     document.body.classList.add('lock-scroll');
-    loadStep();
+    beginPrepare();
   }
 
-  function loadStep() {
+  /* Get-ready countdown shown before every step (including the first). */
+  function beginPrepare() {
     if (queueIndex >= queue.length) {
       finishSession();
       return;
     }
+    phase = 'prepare';
+    $('#player').classList.add('prepare-phase');
     const step = queue[queueIndex];
     const s = step.stretch;
-    $('#playerArea').textContent = AREAS[s.area].label + (queue.length > 1 ? ` · ${queueIndex + 1}/${queue.length}` : '');
+    $('#playerArea').textContent = 'Get Ready' + (queue.length > 1 ? ` · ${queueIndex + 1}/${queue.length}` : '');
     $('#playerStretchName').textContent = s.name;
     $('#playerSide').textContent = step.side ? `${step.side} side` : '';
     $('#playerDesc').textContent = s.desc;
-    $('#playerTip').textContent = s.tip ? `👨‍🍳 ${s.tip}` : '';
+    $('#playerTip').textContent = '';
     renderPlayerProgress();
+
+    totalSeconds = PREPARE_SECONDS;
+    secondsLeft = PREPARE_SECONDS;
+    updateRing(1);
+    $('#timerLabel').textContent = secondsLeft;
+    $('#playerPause').textContent = 'Pause';
+    paused = false;
+    clearInterval(timerHandle);
+    timerHandle = setInterval(tick, 1000);
+    playCue('tick');
+  }
+
+  /* The actual timed stretch, started once the prepare countdown reaches 0. */
+  function beginActive() {
+    phase = 'active';
+    $('#player').classList.remove('prepare-phase');
+    const step = queue[queueIndex];
+    const s = step.stretch;
+    $('#playerArea').textContent = AREAS[s.area].label + (queue.length > 1 ? ` · ${queueIndex + 1}/${queue.length}` : '');
+    $('#playerTip').textContent = s.tip ? `👨‍🍳 ${s.tip}` : '';
 
     totalSeconds = s.duration;
     secondsLeft = s.duration;
     updateRing(1);
     $('#timerLabel').textContent = secondsLeft;
-    $('#playerPause').textContent = 'Pause';
     paused = false;
     clearInterval(timerHandle);
     timerHandle = setInterval(tick, 1000);
@@ -547,16 +571,21 @@
   function tick() {
     if (paused) return;
     secondsLeft -= 1;
-    sessionElapsed += 1;
+    if (phase === 'active') sessionElapsed += 1;
     $('#timerLabel').textContent = Math.max(0, secondsLeft);
     updateRing(secondsLeft / totalSeconds);
-    if (secondsLeft <= 3 && secondsLeft > 0) playCue('tick');
+    if (phase === 'prepare' && secondsLeft > 0) playCue('tick');
+    if (phase === 'active' && secondsLeft <= 3 && secondsLeft > 0) playCue('tick');
     if (secondsLeft <= 0) {
       clearInterval(timerHandle);
-      playCue('done');
-      hapticTick();
-      queueIndex += 1;
-      loadStep();
+      if (phase === 'prepare') {
+        beginActive();
+      } else {
+        playCue('done');
+        hapticTick();
+        queueIndex += 1;
+        beginPrepare();
+      }
     }
   }
 
@@ -574,10 +603,14 @@
 
   function skipStep() {
     clearInterval(timerHandle);
+    if (phase === 'prepare') {
+      // "Next" during the get-ready countdown just starts the stretch now.
+      beginActive();
+      return;
+    }
     sessionElapsed += secondsLeft > 0 ? (totalSeconds - secondsLeft) : totalSeconds;
-    // count at least a few seconds so a rapid skip-through doesn't log 0 minutes oddly
     queueIndex += 1;
-    loadStep();
+    beginPrepare();
   }
 
   function closePlayer(logPartial) {

@@ -359,6 +359,12 @@ button { font-family: inherit; }
 .player-desc { max-width: 320px; opacity: 0.95; font-size: 15px; margin: 4px 0; }
 .player-tip { max-width: 320px; opacity: 0.75; font-size: 13px; font-style: italic; }
 
+/* Get-ready countdown between steps — cooler blue accent so it reads
+   distinctly from the warm orange "actively stretching" state. */
+.player.prepare-phase .ring-fg { stroke: #38bdf8; }
+.player.prepare-phase .player-area { color: #7dd3fc; opacity: 1; font-weight: 700; }
+.player.prepare-phase .timer-label { color: #e0f2fe; }
+
 .player-controls { display: flex; gap: 12px; }
 .player-controls .btn-secondary { flex: 1; background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.2); color: #fff; }
 .player-controls .btn-primary { flex: 1; }
