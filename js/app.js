@@ -746,6 +746,7 @@
     $('#streakSheetClose').onclick = closeStreakSheet;
     $('#streakSheetBackdrop').onclick = closeStreakSheet;
     $('#shareStreakBtn').onclick = shareStreak;
+    $('#preShiftBtn').onclick = () => startSession(PRE_SHIFT_ROUTINE.stretchIds, PRE_SHIFT_ROUTINE.name);
     $('#onboardingDone').onclick = () => {
       Store.completeOnboarding();
       $('#onboarding').classList.add('hidden');

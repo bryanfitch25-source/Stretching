@@ -5,6 +5,7 @@ A daily/weekly/monthly stretching app built for people on their feet all day —
 ## Features
 
 - **Today** — a themed daily stretch session (different focus each day of the week) plus one-tap "Quick Relief" for any single area
+- **Pre-Shift Warm-Up** — a dedicated 8-move, ~3-minute dynamic warm-up (marching, arm circles, torso twists, wrist/finger warm-up) meant to be done standing in the kitchen right before you clock in
 - **Week** — see and repeat each day's plan
 - **Month** — a rotating monthly challenge (days stretched, total minutes, or full-area coverage) with a calendar heatmap and reward badges
 - **Library** — every stretch, filterable by area, with a custom session builder

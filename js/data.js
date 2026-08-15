@@ -110,10 +110,50 @@ const STRETCHES = [
   { id: 'neck-rotation', area: 'neck', name: 'Slow Neck Rotation', duration: 20, sides: false,
     emoji: '🙆', desc: 'Slowly turn your head side to side, look over each shoulder.',
     tip: 'Keeps your neck mobile for scanning a busy kitchen line.' },
+
+  // PRE-SHIFT WARM-UP — dynamic, blood-flowing movements rather than static
+  // holds, meant to be done standing in the kitchen right before clock-in.
+  { id: 'calf-raises', area: 'legs', name: 'Calf Raises', duration: 20, sides: false,
+    emoji: '🦵', desc: 'Rise up onto your toes and lower back down, continuous and controlled.',
+    tip: 'Wakes up your calves before hours on your feet at the line.' },
+  { id: 'march-in-place', area: 'legs', name: 'March in Place', duration: 25, sides: false,
+    emoji: '🦵', desc: 'Lift your knees high, alternating sides, like a light jog in place.',
+    tip: 'Gets blood flowing before a long shift standing on hard kitchen floors.' },
+  { id: 'hip-circles', area: 'legs', name: 'Hip Circles', duration: 20, sides: false,
+    emoji: '🦵', desc: 'Hands on your hips, circle your hips slowly, then reverse direction.',
+    tip: 'Loosens the hips before hours of reaching into low ovens and reach-in coolers.' },
+  { id: 'arm-circles', area: 'shoulders', name: 'Arm Circles', duration: 20, sides: false,
+    emoji: '💪', desc: 'Extend your arms out to the sides and circle them, small to large, then reverse.',
+    tip: 'Primes your shoulders before lifting stock pots, pans, and hotel trays.' },
+  { id: 'torso-twists', area: 'back', name: 'Standing Torso Twists', duration: 20, sides: false,
+    emoji: '🧍', desc: 'Feet planted, gently rotate your torso side to side, letting your arms swing loose.',
+    tip: 'Warms up the spine before a shift full of twisting between stations.' },
+  { id: 'wrist-finger-warmup', area: 'hands', name: 'Wrist & Finger Warm-Up', duration: 20, sides: false,
+    emoji: '✋', desc: 'Shake your hands out, then rapidly open and close your fists, then circle your wrists.',
+    tip: 'Gets blood into your hands before your first knife cut of the day.' },
+  { id: 'forearm-shakeout', area: 'forearms', name: 'Forearm Shake-Out', duration: 15, sides: false,
+    emoji: '🔪', desc: 'Shake out your forearms and hands vigorously, like flicking off water.',
+    tip: 'Releases tension before repetitive chopping and stirring begins.' },
+  { id: 'neck-rolls-dynamic', area: 'neck', name: 'Neck Rolls', duration: 15, sides: false,
+    emoji: '🙆', desc: 'Gently roll your head in a slow circle, then reverse direction.',
+    tip: 'Loosens your neck before hours of looking down at the board and up at tickets.' },
 ];
 
 function getStretch(id) { return STRETCHES.find(s => s.id === id); }
 function stretchesByArea(area) { return STRETCHES.filter(s => s.area === area); }
+
+/* Pre-Shift Warm-Up — a fixed, always-available routine (not tied to the
+   weekly rotation) meant to be done right before clocking in. Dynamic,
+   full-body movements that take under 3 minutes standing in the kitchen. */
+const PRE_SHIFT_ROUTINE = {
+  id: 'pre-shift',
+  name: 'Pre-Shift Warm-Up',
+  theme: 'Get Kitchen Ready',
+  stretchIds: [
+    'march-in-place', 'calf-raises', 'hip-circles', 'arm-circles',
+    'torso-twists', 'neck-rolls-dynamic', 'wrist-finger-warmup', 'forearm-shakeout',
+  ],
+};
 
 /* Weekly plan — one focus theme per day so the whole body gets covered
    over 7 days without any single session feeling huge. */
