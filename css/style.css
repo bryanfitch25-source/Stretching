@@ -38,6 +38,10 @@
 
 * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
+/* Generic hidden utility — component-specific `.foo.hidden` rules below only
+   exist where a more specific override is needed (e.g. flex containers). */
+.hidden { display: none; }
+
 html, body {
   margin: 0;
   height: 100%;
