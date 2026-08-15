@@ -18,6 +18,14 @@ const DEFAULT_STATE = {
 function pad2(n) { return String(n).padStart(2, '0'); }
 function dateKey(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`; }
 function monthKey(d) { return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`; }
+/* `new Date("YYYY-MM-DD")` parses as UTC midnight, which silently shifts to
+   the previous calendar day in any negative-UTC-offset timezone (all of the
+   Americas) once local getters are read back off it. Parse manually so a
+   date key always round-trips to the same local calendar day. */
+function parseDateKey(key) {
+  const [y, m, d] = key.split('-').map(Number);
+  return new Date(y, m - 1, d);
+}
 function daysBetween(a, b) {
   const ms = 24 * 60 * 60 * 1000;
   const da = new Date(a.getFullYear(), a.getMonth(), a.getDate());
@@ -95,7 +103,7 @@ const Store = (() => {
     if (!s.lastDate) {
       s.current = 1;
     } else {
-      const last = new Date(s.lastDate);
+      const last = parseDateKey(s.lastDate);
       const gap = daysBetween(last, now);
       if (gap === 1) {
         s.current += 1;
@@ -130,7 +138,7 @@ const Store = (() => {
   function currentStreakInfo() {
     const s = state.streak;
     if (!s.lastDate) return { current: 0, atRisk: false };
-    const gap = daysBetween(new Date(s.lastDate), new Date());
+    const gap = daysBetween(parseDateKey(s.lastDate), new Date());
     if (gap <= 0) return { current: s.current, atRisk: false };
     if (gap === 1) return { current: s.current, atRisk: true }; // stretch today or lose it
     // more than 1 day passed without logging — streak will reset on next session

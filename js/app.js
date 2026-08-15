@@ -683,7 +683,7 @@
 
     const week = last7DaysKeys();
     $('#weekDots').innerHTML = week.map(k => {
-      const d = new Date(k);
+      const d = parseDateKey(k);
       const label = d.toLocaleDateString('default', { weekday: 'narrow' });
       return `<div class="week-dot-col"><span class="dot ${state.completions[k] ? 'filled' : ''}"></span><span class="dot-label">${label}</span></div>`;
     }).join('');
