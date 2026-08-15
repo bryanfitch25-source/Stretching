@@ -525,6 +525,7 @@
     }
 
     $('#completion').classList.remove('hidden');
+    burstConfetti();
     playCue('celebrate');
     hapticTick(true);
     renderHeader();
@@ -549,7 +550,34 @@
 
   function hapticTick(strong) {
     if (!Store.getState().settings.haptics) return;
+    // Vibration API isn't available in iOS Safari/PWA, so pair it with a visual
+    // "tactile" pulse that reads the same on any device.
     if (navigator.vibrate) navigator.vibrate(strong ? [30, 40, 30] : 15);
+    const target = $('.timer-ring-wrap');
+    if (target) {
+      target.classList.remove('pulse');
+      void target.offsetWidth; // restart animation
+      target.classList.add('pulse');
+    }
+  }
+
+  function burstConfetti() {
+    const layer = $('#confettiLayer');
+    if (!layer) return;
+    layer.innerHTML = '';
+    const colors = ['#fb923c', '#2dd4bf', '#ec4899', '#eab308', '#6366f1', '#22c55e'];
+    const count = 26;
+    for (let i = 0; i < count; i++) {
+      const piece = document.createElement('span');
+      piece.className = 'confetti-piece';
+      piece.style.left = `${Math.random() * 100}%`;
+      piece.style.background = colors[i % colors.length];
+      piece.style.animationDelay = `${Math.random() * 0.3}s`;
+      piece.style.animationDuration = `${1.4 + Math.random() * 0.9}s`;
+      piece.style.transform = `rotate(${Math.random() * 360}deg)`;
+      layer.appendChild(piece);
+    }
+    setTimeout(() => { layer.innerHTML = ''; }, 2600);
   }
 
   /* ---------------------------------------------------------------------
@@ -578,6 +606,21 @@
   }
   function closeStreakSheet() { $('#streakSheet').classList.add('hidden'); }
 
+  async function shareStreak() {
+    const state = Store.getState();
+    const text = state.streak.current > 0
+      ? `I'm on a ${state.streak.current}-day stretch streak with StretchLine 🔥`
+      : `I just started building a stretch streak with StretchLine 🔥`;
+    if (navigator.share) {
+      try { await navigator.share({ text }); } catch (e) { /* user cancelled */ }
+    } else if (navigator.clipboard) {
+      try { await navigator.clipboard.writeText(text); showToast('Copied to clipboard'); }
+      catch (e) { showToast(text); }
+    } else {
+      showToast(text);
+    }
+  }
+
   /* ---------------------------------------------------------------------
      Toast
      --------------------------------------------------------------------- */
@@ -605,6 +648,19 @@
     $('#streakPill').onclick = openStreakSheet;
     $('#streakSheetClose').onclick = closeStreakSheet;
     $('#streakSheetBackdrop').onclick = closeStreakSheet;
+    $('#shareStreakBtn').onclick = shareStreak;
+    $('#onboardingDone').onclick = () => {
+      Store.completeOnboarding();
+      $('#onboarding').classList.add('hidden');
+      document.body.classList.remove('lock-scroll');
+    };
+  }
+
+  function maybeShowOnboarding() {
+    if (!Store.getState().onboarded) {
+      $('#onboarding').classList.remove('hidden');
+      document.body.classList.add('lock-scroll');
+    }
   }
 
   function registerServiceWorker() {
@@ -618,6 +674,7 @@
   function boot() {
     initPlayerControls();
     initNav();
+    maybeShowOnboarding();
     registerServiceWorker();
   }
 

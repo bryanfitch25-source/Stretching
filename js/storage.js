@@ -11,6 +11,7 @@ const DEFAULT_STATE = {
   unlockedBadges: [],    // streak day-thresholds already celebrated
   settings: { sound: true, haptics: true },
   claimedChallenges: [], // "YYYY-MM:challengeId"
+  onboarded: false,
   createdAt: new Date().toISOString(),
 };
 
@@ -41,6 +42,7 @@ const Store = (() => {
         completions: parsed.completions || {},
         unlockedBadges: parsed.unlockedBadges || [],
         claimedChallenges: parsed.claimedChallenges || [],
+        onboarded: !!parsed.onboarded,
       };
     } catch (e) {
       console.warn('StretchLine: could not read saved data, starting fresh.', e);
@@ -182,9 +184,14 @@ const Store = (() => {
     persist();
   }
 
+  function completeOnboarding() {
+    state.onboarded = true;
+    persist();
+  }
+
   return {
     getState, recordSession, currentStreakInfo, completionsForMonth,
     totalStats, claimChallenge, isChallengeClaimedThisMonth, unlockBadge,
-    setSetting, resetAll, persist,
+    setSetting, resetAll, persist, completeOnboarding,
   };
 })();

@@ -22,6 +22,22 @@
 
 <div id="app">
 
+  <!-- ===== Onboarding (first launch only) ===== -->
+  <div id="onboarding" class="onboarding hidden">
+    <div class="onboarding-content">
+      <div class="onboarding-emoji">🧘‍♂️🔪</div>
+      <h1>Welcome to StretchLine</h1>
+      <p>Built for people who spend all day on their feet, hunched over a board, gripping a knife — legs, shoulders, back, hands, and forearms take the hit.</p>
+      <ul class="onboarding-list">
+        <li>🗓️ A themed stretch plan every day of the week</li>
+        <li>🔥 A streak meter that forgives one missed day</li>
+        <li>🏆 Monthly challenges and badges to unlock</li>
+        <li>📴 Works fully offline — everything stays on your phone</li>
+      </ul>
+      <button id="onboardingDone" class="btn-primary btn-large">Let's stretch</button>
+    </div>
+  </div>
+
   <!-- ===== Header ===== -->
   <header class="app-header">
     <div class="header-row">
@@ -131,7 +147,7 @@
             <input type="checkbox" id="soundToggle">
           </label>
           <label class="settings-row">
-            <span>Haptic feedback</span>
+            <span>Tactile pulse feedback</span>
             <input type="checkbox" id="hapticToggle">
           </label>
           <button id="resetDataBtn" class="btn-text btn-danger">Reset all data</button>
@@ -183,6 +199,7 @@
 
   <!-- ===== Completion Overlay ===== -->
   <div id="completion" class="completion hidden">
+    <div class="confetti-layer" id="confettiLayer"></div>
     <div class="completion-card">
       <div class="completion-emoji">🎉</div>
       <h2>Session Complete</h2>
@@ -205,7 +222,8 @@
       <p id="sheetStreakSub" class="view-sub">—</p>
       <div class="week-dots" id="weekDots"></div>
       <div class="freeze-info" id="freezeInfo"></div>
-      <button class="btn-secondary" id="streakSheetClose">Close</button>
+      <button class="btn-secondary" id="shareStreakBtn">Share my streak 🔥</button>
+      <button class="btn-text" id="streakSheetClose">Close</button>
     </div>
   </div>
 

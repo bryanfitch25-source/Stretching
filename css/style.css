@@ -341,6 +341,43 @@ button { font-family: inherit; }
 .dot-label { font-size: 10px; color: var(--text-muted); }
 .freeze-info { font-size: 13px; color: var(--text-muted); background: var(--bg); padding: 12px; border-radius: 12px; margin-bottom: 16px; }
 
+/* ---------- Onboarding ---------- */
+.onboarding {
+  position: fixed; inset: 0; z-index: 100;
+  background: linear-gradient(160deg, var(--teal), #0b3d3a);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  padding: calc(var(--safe-top) + 20px) 26px calc(var(--safe-bottom) + 20px);
+}
+.onboarding.hidden { display: none; }
+.onboarding-content { max-width: 380px; text-align: center; }
+.onboarding-emoji { font-size: 44px; margin-bottom: 10px; }
+.onboarding-content h1 { font-size: 26px; margin: 0 0 12px; }
+.onboarding-content > p { opacity: 0.9; font-size: 15px; margin: 0 0 20px; }
+.onboarding-list { list-style: none; padding: 0; margin: 0 0 26px; text-align: left; display: flex; flex-direction: column; gap: 12px; font-size: 14px; }
+.onboarding-list li { background: rgba(255,255,255,0.1); border-radius: 12px; padding: 10px 14px; }
+.onboarding .btn-primary { color: var(--teal); }
+
+/* ---------- Tactile pulse (visual stand-in for haptics on iOS Safari) ---------- */
+.timer-ring-wrap.pulse { animation: tactile-pulse 0.4s ease; }
+@keyframes tactile-pulse {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+/* ---------- Confetti ---------- */
+.confetti-layer { position: absolute; inset: 0; overflow: hidden; pointer-events: none; z-index: 1; }
+.confetti-piece {
+  position: absolute; top: -10%; width: 8px; height: 14px; opacity: 0.9;
+  animation-name: confetti-fall; animation-timing-function: ease-in; animation-fill-mode: forwards;
+  border-radius: 2px;
+}
+@keyframes confetti-fall {
+  0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(560px) rotate(360deg); opacity: 0; }
+}
+
 /* ---------- Toast ---------- */
 .toast {
   position: fixed; left: 50%; bottom: calc(var(--tab-bar-height) + var(--safe-bottom) + 16px);
