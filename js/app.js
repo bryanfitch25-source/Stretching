@@ -11,6 +11,9 @@
 
   let selectedLibraryStretches = new Set();
   let activeAreaFilter = 'all';
+  let librarySearchQuery = '';
+
+  const VIEW_ORDER = ['today', 'weekly', 'monthly', 'library', 'progress'];
 
   /* ---------------------------------------------------------------------
      Navigation
@@ -32,7 +35,36 @@
       btn.addEventListener('click', () => switchView(btn.dataset.target));
     });
     const initial = (location.hash || '#today').replace('#', '');
-    switchView(['today', 'weekly', 'monthly', 'library', 'progress'].includes(initial) ? initial : 'today');
+    switchView(VIEW_ORDER.includes(initial) ? initial : 'today');
+  }
+
+  /* Swipe left/right on the main content to move between tabs — a natural
+     iOS gesture that saves a reach down to the tab bar. */
+  function initSwipeNav() {
+    const main = $('#main');
+    let startX = null, startY = null, tracking = false;
+
+    main.addEventListener('touchstart', (e) => {
+      if (e.touches.length !== 1) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      tracking = true;
+    }, { passive: true });
+
+    main.addEventListener('touchend', (e) => {
+      if (!tracking || startX === null) return;
+      tracking = false;
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const dx = endX - startX;
+      const dy = endY - startY;
+      if (Math.abs(dx) < 60 || Math.abs(dx) < Math.abs(dy) * 1.5) return;
+
+      const current = $$('.view').find(v => !v.classList.contains('hidden'))?.dataset.view || 'today';
+      const idx = VIEW_ORDER.indexOf(current);
+      if (dx < 0 && idx < VIEW_ORDER.length - 1) switchView(VIEW_ORDER[idx + 1]);
+      if (dx > 0 && idx > 0) switchView(VIEW_ORDER[idx - 1]);
+    }, { passive: true });
   }
 
   /* ---------------------------------------------------------------------
@@ -60,12 +92,21 @@
     $('#todaySummary').textContent = `${plan.stretchIds.length} stretches · ${areaLabels}`;
 
     const startBtn = $('#startTodayBtn');
+    const nudgeEl = ensureNudgeEl();
     if (doneToday) {
       startBtn.textContent = `Done today ✓  (Stretch again)`;
       $('#todayHero').classList.add('done');
+      nudgeEl.classList.add('hidden');
     } else {
       startBtn.textContent = "Start Today's Stretch";
       $('#todayHero').classList.remove('done');
+      const hour = new Date().getHours();
+      if (hour >= 17) {
+        nudgeEl.textContent = "End of shift — perfect time to unwind before you head home.";
+        nudgeEl.classList.remove('hidden');
+      } else {
+        nudgeEl.classList.add('hidden');
+      }
     }
     startBtn.onclick = () => startSession(plan.stretchIds, `${plan.name}: ${plan.theme}`);
 
@@ -95,7 +136,8 @@
       const btn = document.createElement('button');
       btn.className = 'quick-relief-btn';
       btn.style.setProperty('--area-color', area.color);
-      btn.innerHTML = `<span class="qr-emoji">${area.emoji}</span><span>${area.label}</span>`;
+      btn.setAttribute('aria-label', `Quick relief stretch for ${area.label}`);
+      btn.innerHTML = `<span class="qr-emoji" aria-hidden="true">${area.emoji}</span><span>${area.label}</span>`;
       btn.onclick = () => {
         const pool = stretchesByArea(areaKey);
         const pick = shuffle(pool).slice(0, 3).map(s => s.id);
@@ -103,6 +145,17 @@
       };
       grid.appendChild(btn);
     });
+  }
+
+  function ensureNudgeEl() {
+    let el = $('#todayNudge');
+    if (!el) {
+      el = document.createElement('p');
+      el.id = 'todayNudge';
+      el.className = 'hero-nudge hidden';
+      $('#startTodayBtn').insertAdjacentElement('beforebegin', el);
+    }
+    return el;
   }
 
   function renderWeeklyGoalCard() {
@@ -117,6 +170,7 @@
       </div>
       <p class="progress-label">${doneCount} / ${target} days logged</p>
     `;
+    $('#weeklyGoalCard').onclick = () => switchView('weekly');
   }
 
   /* ---------------------------------------------------------------------
@@ -222,7 +276,9 @@
       const unlocked = state.unlockedBadges.includes(b.days) || state.streak.longest >= b.days;
       const el = document.createElement('div');
       el.className = `badge ${unlocked ? 'unlocked' : 'locked'}`;
-      el.innerHTML = `<span class="badge-emoji">${unlocked ? b.emoji : '🔒'}</span><span class="badge-label">${b.label}</span><span class="badge-days">${b.days} days</span>`;
+      el.setAttribute('role', 'img');
+      el.setAttribute('aria-label', `${b.label} badge, ${b.days} day streak, ${unlocked ? 'unlocked' : 'locked'}`);
+      el.innerHTML = `<span class="badge-emoji" aria-hidden="true">${unlocked ? b.emoji : '🔒'}</span><span class="badge-label">${b.label}</span><span class="badge-days">${b.days} days</span>`;
       grid.appendChild(el);
     });
   }
@@ -257,9 +313,22 @@
       chip.onclick = () => { activeAreaFilter = chip.dataset.area; renderLibrary(); };
     });
 
+    const searchInput = $('#librarySearch');
+    if (searchInput.value !== librarySearchQuery) searchInput.value = librarySearchQuery;
+    searchInput.oninput = (e) => { librarySearchQuery = e.target.value; renderLibrary(); };
+
     const list = $('#libraryList');
     list.innerHTML = '';
-    const items = activeAreaFilter === 'all' ? STRETCHES : stretchesByArea(activeAreaFilter);
+    let items = activeAreaFilter === 'all' ? STRETCHES : stretchesByArea(activeAreaFilter);
+    const q = librarySearchQuery.trim().toLowerCase();
+    if (q) {
+      items = items.filter(s =>
+        s.name.toLowerCase().includes(q) ||
+        s.desc.toLowerCase().includes(q) ||
+        AREAS[s.area].label.toLowerCase().includes(q)
+      );
+    }
+    $('#libraryEmpty').classList.toggle('hidden', items.length > 0);
     items.forEach(s => {
       const area = AREAS[s.area];
       const row = document.createElement('div');
@@ -299,12 +368,33 @@
     renderHeader();
     const stats = Store.totalStats();
     const state = Store.getState();
+
+    let emptyState = $('#progressEmpty');
+    if (stats.totalDays === 0) {
+      if (!emptyState) {
+        emptyState = document.createElement('div');
+        emptyState.id = 'progressEmpty';
+        emptyState.className = 'card empty-state';
+        emptyState.innerHTML = `
+          <p class="card-title">No stretches logged yet</p>
+          <p class="card-sub">Your streak, badges, and heatmap will fill in as soon as you finish your first session.</p>
+          <button class="btn-secondary btn-block" id="progressEmptyCta">Go stretch now</button>
+        `;
+        $('#statGrid').insertAdjacentElement('beforebegin', emptyState);
+        $('#progressEmptyCta').onclick = () => switchView('today');
+      }
+      emptyState.classList.remove('hidden');
+    } else if (emptyState) {
+      emptyState.classList.add('hidden');
+    }
+
     $('#statGrid').innerHTML = `
-      <div class="stat-tile"><strong>${state.streak.current}</strong><span>Current streak</span></div>
+      <div class="stat-tile" id="statCurrentStreak" role="button" tabindex="0"><strong>${state.streak.current}</strong><span>Current streak</span></div>
       <div class="stat-tile"><strong>${state.streak.longest}</strong><span>Longest streak</span></div>
       <div class="stat-tile"><strong>${Math.round(stats.totalMinutes)}</strong><span>Total minutes</span></div>
       <div class="stat-tile"><strong>${stats.totalDays}</strong><span>Days stretched</span></div>
     `;
+    $('#statCurrentStreak').onclick = openStreakSheet;
 
     renderHeatmap();
     renderBadgeGrid('#allBadgeGrid');
@@ -644,7 +734,14 @@
     $('#playerClose').onclick = () => closePlayer(true);
     $('#playerPause').onclick = togglePause;
     $('#playerSkip').onclick = skipStep;
+    $('#timerRingWrap').addEventListener('click', togglePause);
+    $('#timerRingWrap').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); togglePause(); }
+    });
     $('#completionDone').onclick = () => { $('#completion').classList.add('hidden'); renderToday(); };
+    $('#completion').addEventListener('click', (e) => {
+      if (e.target.id === 'completion') { $('#completion').classList.add('hidden'); renderToday(); }
+    });
     $('#streakPill').onclick = openStreakSheet;
     $('#streakSheetClose').onclick = closeStreakSheet;
     $('#streakSheetBackdrop').onclick = closeStreakSheet;
@@ -663,6 +760,28 @@
     }
   }
 
+  /* ---------------------------------------------------------------------
+     "Add to Home Screen" banner — only relevant on iOS Safari, and only
+     when the app is NOT already running as an installed standalone app.
+     --------------------------------------------------------------------- */
+  const INSTALL_DISMISS_KEY = 'stretchline:installBannerDismissed';
+
+  function initInstallBanner() {
+    const isStandalone = window.navigator.standalone === true ||
+      window.matchMedia('(display-mode: standalone)').matches;
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    const dismissed = localStorage.getItem(INSTALL_DISMISS_KEY) === '1';
+
+    if (isStandalone || !isIOS || dismissed) return;
+
+    const banner = $('#installBanner');
+    banner.classList.remove('hidden');
+    $('#installBannerClose').onclick = () => {
+      banner.classList.add('hidden');
+      localStorage.setItem(INSTALL_DISMISS_KEY, '1');
+    };
+  }
+
   function registerServiceWorker() {
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
@@ -674,7 +793,9 @@
   function boot() {
     initPlayerControls();
     initNav();
+    initSwipeNav();
     maybeShowOnboarding();
+    initInstallBanner();
     registerServiceWorker();
   }
 

@@ -22,5 +22,25 @@
     { "src": "icons/icon-384.png", "sizes": "384x384", "type": "image/png" },
     { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
     { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Today's Stretch",
+      "short_name": "Today",
+      "url": "./index.html#today",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "Stretch Library",
+      "short_name": "Library",
+      "url": "./index.html#library",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    },
+    {
+      "name": "My Progress",
+      "short_name": "Progress",
+      "url": "./index.html#progress",
+      "icons": [{ "src": "icons/icon-96.png", "sizes": "96x96", "type": "image/png" }]
+    }
   ]
 }

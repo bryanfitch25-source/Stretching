@@ -38,6 +38,16 @@
     </div>
   </div>
 
+  <!-- ===== Add to Home Screen banner (shown only in browser tab, not once installed) ===== -->
+  <div id="installBanner" class="install-banner hidden">
+    <span class="install-banner-icon">📲</span>
+    <div class="install-banner-text">
+      <strong>Add StretchLine to your Home Screen</strong>
+      <span>Tap <strong>Share</strong> ⬆️ then <strong>Add to Home Screen</strong> for the full offline app.</span>
+    </div>
+    <button id="installBannerClose" class="icon-btn" aria-label="Dismiss">✕</button>
+  </div>
+
   <!-- ===== Header ===== -->
   <header class="app-header">
     <div class="header-row">
@@ -119,8 +129,10 @@
         <h1>Stretch Library</h1>
         <p class="view-sub">Browse by area, build your own session.</p>
       </div>
+      <input type="search" id="librarySearch" class="library-search" placeholder="Search stretches (e.g. wrist, calf, neck)" aria-label="Search stretches">
       <div class="area-filter" id="areaFilter"></div>
       <div id="libraryList" class="library-list"></div>
+      <p id="libraryEmpty" class="library-empty hidden">No stretches match your search. Try a different term or area.</p>
       <button id="startCustomBtn" class="btn-primary btn-large btn-floating hidden">Start Selected (<span id="customCount">0</span>)</button>
     </section>
 
@@ -179,12 +191,12 @@
       <h2 id="playerStretchName">Stretch Name</h2>
       <p class="player-side" id="playerSide"></p>
 
-      <div class="timer-ring-wrap">
+      <div class="timer-ring-wrap" id="timerRingWrap" role="button" tabindex="0" aria-label="Tap to pause or resume">
         <svg class="timer-ring" viewBox="0 0 200 200">
           <circle class="ring-bg" cx="100" cy="100" r="90"></circle>
           <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="90"></circle>
         </svg>
-        <div class="timer-label" id="timerLabel">30</div>
+        <div class="timer-label" id="timerLabel" aria-live="polite">30</div>
       </div>
 
       <p class="player-desc" id="playerDesc">Description goes here.</p>
