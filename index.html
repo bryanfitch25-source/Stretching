@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>StretchLine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="description" content="Daily stretching plans built for people on their feet all day.">
+<meta name="theme-color" content="#0f766e" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1220" media="(prefers-color-scheme: dark)">
+
+<!-- iOS home screen app behavior -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="StretchLine">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== Header ===== -->
+  <header class="app-header">
+    <div class="header-row">
+      <div class="brand">
+        <span class="brand-mark">🧘</span>
+        <span class="brand-name">StretchLine</span>
+      </div>
+      <button id="streakPill" class="streak-pill" aria-label="View streak details">
+        <span class="flame">🔥</span>
+        <span id="streakCount">0</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- ===== Views ===== -->
+  <main id="main">
+
+    <!-- TODAY -->
+    <section id="view-today" class="view" data-view="today">
+      <div class="today-hero" id="todayHero">
+        <p class="hero-eyebrow" id="todayThemeLabel">Today's Focus</p>
+        <h1 id="todayThemeName">—</h1>
+        <p class="hero-sub" id="todaySummary">—</p>
+        <button id="startTodayBtn" class="btn-primary btn-large">Start Today's Stretch</button>
+      </div>
+
+      <div class="section-block">
+        <div class="section-heading">
+          <h2>Weekly Goal</h2>
+        </div>
+        <div class="card weekly-goal-card" id="weeklyGoalCard"></div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-heading">
+          <h2>This Month</h2>
+        </div>
+        <div class="card monthly-card" id="monthlyCard"></div>
+      </div>
+
+      <div class="section-block">
+        <div class="section-heading">
+          <h2>Quick Relief</h2>
+          <p class="section-hint">One-off stretch when something's bugging you right now</p>
+        </div>
+        <div class="quick-relief-grid" id="quickReliefGrid"></div>
+      </div>
+    </section>
+
+    <!-- WEEKLY -->
+    <section id="view-weekly" class="view hidden" data-view="weekly">
+      <div class="view-header">
+        <h1>This Week</h1>
+        <p class="view-sub">A different focus every day so nothing gets overworked.</p>
+      </div>
+      <div id="weeklyList" class="weekly-list"></div>
+    </section>
+
+    <!-- MONTHLY -->
+    <section id="view-monthly" class="view hidden" data-view="monthly">
+      <div class="view-header">
+        <h1>This Month</h1>
+        <p class="view-sub" id="monthSubtitle">—</p>
+      </div>
+      <div class="card challenge-card" id="challengeDetailCard"></div>
+      <div class="section-block">
+        <div class="section-heading"><h2>Calendar</h2></div>
+        <div id="monthCalendar" class="month-calendar"></div>
+      </div>
+      <div class="section-block">
+        <div class="section-heading"><h2>Badges</h2></div>
+        <div id="badgeGrid" class="badge-grid"></div>
+      </div>
+    </section>
+
+    <!-- LIBRARY -->
+    <section id="view-library" class="view hidden" data-view="library">
+      <div class="view-header">
+        <h1>Stretch Library</h1>
+        <p class="view-sub">Browse by area, build your own session.</p>
+      </div>
+      <div class="area-filter" id="areaFilter"></div>
+      <div id="libraryList" class="library-list"></div>
+      <button id="startCustomBtn" class="btn-primary btn-large btn-floating hidden">Start Selected (<span id="customCount">0</span>)</button>
+    </section>
+
+    <!-- PROGRESS -->
+    <section id="view-progress" class="view hidden" data-view="progress">
+      <div class="view-header">
+        <h1>Your Progress</h1>
+        <p class="view-sub">Consistency beats intensity.</p>
+      </div>
+      <div class="stat-grid" id="statGrid"></div>
+      <div class="section-block">
+        <div class="section-heading"><h2>Last 7 Weeks</h2></div>
+        <div id="heatmap" class="heatmap"></div>
+      </div>
+      <div class="section-block">
+        <div class="section-heading"><h2>All Badges</h2></div>
+        <div id="allBadgeGrid" class="badge-grid"></div>
+      </div>
+      <div class="section-block">
+        <div class="section-heading"><h2>Settings</h2></div>
+        <div class="card settings-card">
+          <label class="settings-row">
+            <span>Sound cues</span>
+            <input type="checkbox" id="soundToggle">
+          </label>
+          <label class="settings-row">
+            <span>Haptic feedback</span>
+            <input type="checkbox" id="hapticToggle">
+          </label>
+          <button id="resetDataBtn" class="btn-text btn-danger">Reset all data</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ===== Bottom Tab Bar ===== -->
+  <nav class="tab-bar" id="tabBar">
+    <button class="tab-btn active" data-target="today"><span class="tab-icon">🏠</span><span>Today</span></button>
+    <button class="tab-btn" data-target="weekly"><span class="tab-icon">📅</span><span>Week</span></button>
+    <button class="tab-btn" data-target="monthly"><span class="tab-icon">🏆</span><span>Month</span></button>
+    <button class="tab-btn" data-target="library"><span class="tab-icon">📚</span><span>Library</span></button>
+    <button class="tab-btn" data-target="progress"><span class="tab-icon">📈</span><span>Progress</span></button>
+  </nav>
+
+  <!-- ===== Session Player Overlay ===== -->
+  <div id="player" class="player hidden">
+    <div class="player-top">
+      <button id="playerClose" class="icon-btn" aria-label="Close">✕</button>
+      <div class="player-progress" id="playerProgress"></div>
+      <div class="player-spacer"></div>
+    </div>
+
+    <div class="player-body">
+      <p class="player-area" id="playerArea">Legs</p>
+      <h2 id="playerStretchName">Stretch Name</h2>
+      <p class="player-side" id="playerSide"></p>
+
+      <div class="timer-ring-wrap">
+        <svg class="timer-ring" viewBox="0 0 200 200">
+          <circle class="ring-bg" cx="100" cy="100" r="90"></circle>
+          <circle class="ring-fg" id="ringFg" cx="100" cy="100" r="90"></circle>
+        </svg>
+        <div class="timer-label" id="timerLabel">30</div>
+      </div>
+
+      <p class="player-desc" id="playerDesc">Description goes here.</p>
+      <p class="player-tip" id="playerTip"></p>
+    </div>
+
+    <div class="player-controls">
+      <button id="playerPause" class="btn-secondary">Pause</button>
+      <button id="playerSkip" class="btn-primary">Next</button>
+    </div>
+  </div>
+
+  <!-- ===== Completion Overlay ===== -->
+  <div id="completion" class="completion hidden">
+    <div class="completion-card">
+      <div class="completion-emoji">🎉</div>
+      <h2>Session Complete</h2>
+      <p id="completionMsg" class="completion-msg">—</p>
+      <div class="completion-stats">
+        <div><strong id="completionMinutes">0</strong><span>minutes</span></div>
+        <div><strong id="completionStreak">0</strong><span>day streak</span></div>
+      </div>
+      <div id="completionBadge" class="completion-badge hidden"></div>
+      <button id="completionDone" class="btn-primary btn-large">Nice</button>
+    </div>
+  </div>
+
+  <!-- ===== Streak Detail Sheet ===== -->
+  <div id="streakSheet" class="sheet hidden">
+    <div class="sheet-backdrop" id="streakSheetBackdrop"></div>
+    <div class="sheet-content">
+      <div class="sheet-handle"></div>
+      <h2>🔥 <span id="sheetStreakCount">0</span>-Day Streak</h2>
+      <p id="sheetStreakSub" class="view-sub">—</p>
+      <div class="week-dots" id="weekDots"></div>
+      <div class="freeze-info" id="freezeInfo"></div>
+      <button class="btn-secondary" id="streakSheetClose">Close</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
