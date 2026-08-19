@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 108 108" width="108" height="108">
+  <!-- Adaptive icon foreground: bowl + whisk, kept inside the ~66dp safe circle centered at (54,54). -->
+  <rect x="51" y="8" width="6" height="34" rx="3" fill="#FBF3E7" transform="rotate(18 54 25)"/>
+  <path d="M28 44 a26 26 0 0 0 52 0 z" fill="#FBF3E7"/>
+  <rect x="24" y="40" width="60" height="6" rx="3" fill="#FBF3E7"/>
+</svg>

@@ -129,13 +129,31 @@ publishing:
 
 ### Icons
 
-`www/icons/icon.svg` is a simple placeholder mark (a mixing bowl + scale
-arrows on a terracotta field). Use Android Studio's **Image Asset
-Studio** (right-click `android/app/src/main/res` → New → Image Asset) to
-generate the full adaptive-icon PNG set from it, or design your own
-launcher icon — Play Store also requires a separate 512×512 hi-res icon
-and a 1024×500 feature graphic for the store listing, which this repo
-does not include.
+`www/icons/icon.svg` (favicon + store hi-res icon) and
+`www/icons/icon-foreground.svg` / `icon-background.svg` (the Android
+adaptive-icon layers, simplified to read clearly at launcher size) are the
+source-of-truth icon designs — a mixing bowl + whisk on a terracotta field.
+
+Since `android/` isn't committed to git (see "Project structure" above),
+its launcher icon PNGs need to be regenerated any time you run a fresh
+`npx cap add android`. A script does this for you:
+
+```bash
+pip install pillow cairosvg
+npm run icons
+```
+
+This writes the full adaptive-icon set (`ic_launcher_foreground.png` +
+`ic_launcher_background` color at every density) and the legacy/round
+launcher icons into `android/app/src/main/res/mipmap-*`, plus two ready-to
+-upload Play Store assets into `store-assets/`: a 512×512 hi-res icon and
+a 1024×500 feature graphic. Screenshots still need to be taken by hand
+from a running build/emulator — those aren't generated here.
+
+If you'd rather design your own launcher icon from scratch instead, edit
+the source SVGs and re-run the script, or use Android Studio's **Image
+Asset Studio** (right-click `android/app/src/main/res` → New → Image
+Asset).
 
 ### Building a signed .aab for the Play Store
 
@@ -177,9 +195,10 @@ repo). Follow "Building a signed .aab" below to produce an upload-ready one.
   upload keys vs. app signing keys separately — follow its Play App
   Signing enrollment flow).
 - Create the app listing and upload the signed `.aab`.
-- **Store listing assets**: a 512×512 hi-res icon, a 1024×500 feature
-  graphic, and at least 2 phone screenshots (take these from a running
-  build/emulator) — none of these are generated here.
+- **Store listing assets**: a 512×512 hi-res icon and a 1024×500 feature
+  graphic are provided in `store-assets/` (run `npm run icons` to
+  regenerate them). You still need at least 2 phone screenshots, taken by
+  hand from a running build/emulator.
 - Fill in the **Data safety** section — this app collects no data, so
   you'll declare "No data collected."
 - Host `privacy-policy.html` somewhere public (GitHub Pages, your own
