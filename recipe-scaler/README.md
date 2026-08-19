@@ -67,6 +67,7 @@ native Preferences once running inside the Android app.
 cd recipe-scaler
 npm install
 npm start          # serves www/ at http://localhost:8100
+npm test           # unit tests for the scaling/conversion/shopping-list logic
 ```
 
 ## Turning this into an Android app
