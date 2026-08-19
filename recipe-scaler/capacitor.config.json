@@ -1,0 +1,14 @@
+{
+  "appId": "com.placeholder.yield",
+  "appName": "Yield",
+  "webDir": "www",
+  "android": {
+    "minWebViewVersion": 90,
+    "backgroundColor": "#FBF3E7"
+  },
+  "plugins": {
+    "Preferences": {
+      "group": "YieldRecipeData"
+    }
+  }
+}
