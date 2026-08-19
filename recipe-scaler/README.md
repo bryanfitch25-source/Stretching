@@ -86,18 +86,33 @@ npx cap open android      # opens the project in Android Studio
 ### Setting the minimum SDK to API 36
 
 Play Store requires new/updated apps to target API 36 (Android 16) by
-August 31, 2026. After `npx cap add android`, open
-`android/variables.gradle` and set:
+August 31, 2026. `npx cap add android` scaffolds a project pinned to API 34
+on an older Android Gradle Plugin, which doesn't support compileSdk 36 —
+you need to bump three things together. **This exact combination has been
+build-verified in CI-less sandbox testing** (`./gradlew assembleDebug` and
+`./gradlew bundleRelease` both succeeded against SDK Platform 36):
 
-```gradle
-minSdkVersion = 24          // or higher, your call on device support floor
-compileSdkVersion = 36
-targetSdkVersion = 36
-```
+1. `android/variables.gradle`:
+   ```gradle
+   minSdkVersion = 24          // or higher, your call on device support floor
+   compileSdkVersion = 36
+   targetSdkVersion = 36
+   ```
+2. `android/build.gradle` — bump the Android Gradle Plugin (the scaffolded
+   8.2.x doesn't understand compileSdk 36):
+   ```gradle
+   classpath 'com.android.tools.build:gradle:8.10.0'
+   ```
+3. `android/gradle/wrapper/gradle-wrapper.properties` — AGP 8.10.0 requires
+   Gradle ≥ 8.11.1:
+   ```
+   distributionUrl=https\://services.gradle.org/distributions/gradle-8.11.1-all.zip
+   ```
 
-Make sure your installed Android SDK Platform 36 and a recent-enough
-Android Gradle Plugin/Android Studio version are installed (Android
-Studio's SDK Manager will prompt you if not).
+Then, in Android Studio's SDK Manager, install **SDK Platform 36** and
+**Build-Tools 36.0.0** if prompted (Studio will prompt automatically on
+first sync if they're missing). JDK 17+ is required by AGP 8.10 — recent
+Android Studio versions bundle a compatible JDK automatically.
 
 ### Renaming the app / bundle ID before publishing
 
@@ -143,6 +158,16 @@ cd android
 ./gradlew bundleRelease
 # output: android/app/build/outputs/bundle/release/app-release.aab
 ```
+
+## Build verification
+
+The full pipeline above (`cap add android` → the three version bumps →
+`./gradlew assembleDebug` / `./gradlew bundleRelease`) has been run
+end-to-end and both succeed: a working `app-debug.apk` and an
+`app-release.aab` were produced. The release bundle from that run is
+**unsigned** (no `signingConfig` is wired up in `app/build.gradle` — that's
+deliberate, since a real signing key has to be yours, not baked into this
+repo). Follow "Building a signed .aab" below to produce an upload-ready one.
 
 ## What you still need to do in Play Console (can't be done for you)
 
