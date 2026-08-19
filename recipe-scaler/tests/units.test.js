@@ -53,7 +53,9 @@ test('picks the friendliest metric weight unit (kg once >= 1000g)', () => {
 });
 
 test('weight conversion picks lb once the ounce value would exceed 16', () => {
-  const r = Units.scaleQuantity(2, 'lb', 1, 'imperial'); // already imperial, no-op conversion
-  assert.equal(r.unit, 'lb');
-  assert.equal(r.qty, 2);
+  const r = Units.scaleQuantity(250, 'g', 1, 'imperial'); // 250g ~= 8.8oz -> stays oz
+  assert.equal(r.unit, 'oz');
+
+  const big = Units.scaleQuantity(1000, 'g', 1, 'imperial'); // 1000g ~= 35oz -> crosses to lb
+  assert.equal(big.unit, 'lb');
 });
