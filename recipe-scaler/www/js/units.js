@@ -94,15 +94,15 @@ function scaleQuantity(qty, unit, factor, targetSystem = null) {
     return { qty: r, unit, display: `${r % 1 === 0 ? r : r.toFixed(2).replace(/0+$/, '').replace(/\.$/, '')}` };
   }
 
-  const currentSystem = unitSystem(unit);
-  const wantSystem = targetSystem || currentSystem;
-
-  if (wantSystem !== currentSystem) {
+  // An explicit system selection ("Imperial"/"Metric") re-picks the
+  // friendliest unit even within the same system (e.g. 1500ml -> 1.5l).
+  // "As written" (targetSystem === null) always keeps the original unit.
+  if (targetSystem) {
     const toBase = family === 'volume' ? VOLUME_TO_ML : WEIGHT_TO_G;
     const baseQty = scaled * toBase[unit];
     const candidates = family === 'volume'
-      ? (wantSystem === 'imperial' ? IMPERIAL_VOLUME : METRIC_VOLUME)
-      : (wantSystem === 'imperial' ? IMPERIAL_WEIGHT : METRIC_WEIGHT);
+      ? (targetSystem === 'imperial' ? IMPERIAL_VOLUME : METRIC_VOLUME)
+      : (targetSystem === 'imperial' ? IMPERIAL_WEIGHT : METRIC_WEIGHT);
     const { unit: bestUnit, qty: bestQty } = pickBestUnit(baseQty, candidates, toBase);
     return finalizeQuantity(bestQty, bestUnit);
   }
